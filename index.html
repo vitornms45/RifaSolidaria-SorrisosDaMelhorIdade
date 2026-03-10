@@ -525,7 +525,6 @@
   // ── Apply config to DOM ──
   function applyConfig() {
     const titulo = getConfig('titulo');
-    document.getElementById('rifaTitulo').innerHTML = titulo.replace('\n','<br>');
     document.getElementById('rifaSubtitulo').textContent = getConfig('subtitulo');
     document.getElementById('rifaBadge').textContent = getConfig('badge');
     document.getElementById('cfgTitulo').value = titulo;
