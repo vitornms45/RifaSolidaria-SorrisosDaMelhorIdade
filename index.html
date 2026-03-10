@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎟️ RifaSolidaria — Sorrisos da Melhor Idade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #f5c842;
+      --gold-dark: #c99a10;
+      --bg: #0e0b1a;
+      --surface: #1a1530;
+      --surface2: #251e3e;
+      --accent: #ff4f6d;
+      --green: #22c55e;
+      --sold: #3a3558;
+      --sold-text: #5a527a;
+      --text: #f0ecff;
+      --muted: #8b82aa;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(245,200,66,.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 80% 80%, rgba(255,79,109,.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .wrapper { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 1.25rem 4rem; }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      position: relative;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: .3rem .9rem;
+      border-radius: 99px;
+      margin-bottom: 1rem;
+    }
+    header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 8vw, 6rem);
+      line-height: .95;
+      letter-spacing: .03em;
+      background: linear-gradient(135deg, #f5c842 0%, #ff9940 50%, #ff4f6d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p.subtitle {
+      margin-top: .75rem;
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* ── Pricing card ── */
+    .pricing {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 1.5rem 0 2rem;
+    }
+    .price-card {
+      background: var(--surface);
+      border: 1px solid rgba(245,200,66,.2);
+      border-radius: 1rem;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 140px;
+    }
+    .price-card .val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.2rem;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .price-card .label { font-size: .78rem; color: var(--muted); margin-top: .25rem; font-weight: 600; }
+
+    /* ── Summary bar ── */
+    #summary {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(14,11,26,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(245,200,66,.15);
+      padding: .75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .75rem;
+      transition: opacity .3s;
+    }
+    .summary-info { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+    .summary-chip {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .85rem; font-weight: 700;
+    }
+    .summary-chip span.val { color: var(--gold); font-size: 1.05rem; }
+    #btnEnviar {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: #fff;
+      border: none;
+      border-radius: .6rem;
+      padding: .65rem 1.4rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .9rem;
+      cursor: pointer;
+      display: flex; align-items: center; gap: .5rem;
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+      white-space: nowrap;
+    }
+    #btnEnviar:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,211,102,.4); }
+    #btnEnviar:disabled { opacity: .4; cursor: not-allowed; }
+    #btnEnviar svg { width:18px; height:18px; fill:currentColor; }
+
+    /* ── Grid ── */
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: .45rem;
+    }
+
+    .num-btn {
+      aspect-ratio: 1;
+      border-radius: .5rem;
+      border: 1.5px solid rgba(255,255,255,.08);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: background .12s, border-color .12s, transform .1s, color .12s;
+      position: relative;
+    }
+    .num-btn:hover:not(.sold):not(.selected) {
+      background: rgba(245,200,66,.15);
+      border-color: var(--gold-dark);
+      transform: scale(1.06);
+    }
+    .num-btn.selected {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #1a1200;
+      transform: scale(1.08);
+      box-shadow: 0 0 12px rgba(245,200,66,.5);
+    }
+    .num-btn.sold {
+      background: var(--sold);
+      border-color: transparent;
+      color: var(--sold-text);
+      cursor: not-allowed;
+      font-size: .7rem;
+    }
+    .num-btn.sold::after {
+      content: '✕';
+      position: absolute;
+      inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem;
+      color: var(--sold-text);
+      opacity: .6;
+    }
+
+    /* ── Admin toggle ── */
+    #adminToggle {
+      margin: 3rem auto 0;
+      display: block;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--muted);
+      padding: .5rem 1.2rem;
+      border-radius: .5rem;
+      font-family: 'Syne', sans-serif;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    #adminToggle:hover { border-color: var(--gold-dark); color: var(--gold); }
+
+    /* ── Admin panel ── */
+    #adminPanel {
+      display: none;
+      margin-top: 1.5rem;
+      background: var(--surface);
+      border: 1px solid rgba(245,200,66,.2);
+      border-radius: 1.25rem;
+      padding: 2rem;
+    }
+    #adminPanel.open { display: block; animation: fadeSlide .3s ease; }
+
+    @keyframes fadeSlide {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .admin-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; flex-wrap: wrap; gap: .75rem;
+    }
+    .admin-header h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem; letter-spacing: .06em;
+      color: var(--gold);
+    }
+
+    #loginArea { text-align: center; padding: 1rem 0 1.5rem; }
+    #loginArea p { color: var(--muted); margin-bottom: 1rem; font-size:.9rem; }
+    #pwdInput {
+      background: var(--surface2);
+      border: 1.5px solid rgba(255,255,255,.1);
+      border-radius: .5rem;
+      padding: .6rem 1rem;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: .9rem;
+      margin-right: .5rem;
+      width: 180px;
+    }
+    #pwdInput:focus { outline: none; border-color: var(--gold); }
+    #btnLogin {
+      background: var(--gold);
+      color: #1a1200;
+      border: none;
+      border-radius: .5rem;
+      padding: .6rem 1.2rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #loginError { color: var(--accent); font-size: .8rem; margin-top: .6rem; display: none; }
+
+    #adminContent { display: none; }
+    #adminContent.visible { display: block; }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: .45rem;
+      margin-top: 1rem;
+    }
+
+    .admin-num {
+      aspect-ratio: 1;
+      border-radius: .5rem;
+      border: 1.5px solid rgba(255,255,255,.08);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: background .12s, border-color .12s;
+    }
+    .admin-num:hover:not(.sold-admin) { border-color: var(--accent); background: rgba(255,79,109,.15); }
+    .admin-num.sold-admin {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .admin-legend {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      margin-bottom: 1rem; font-size: .8rem; color: var(--muted);
+    }
+    .legend-dot { display: inline-block; width:10px; height:10px; border-radius:2px; margin-right:.3rem; }
+
+    /* ── Config section ── */
+    .config-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,.07);
+    }
+    .config-section h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; letter-spacing: .06em;
+      color: var(--muted); margin-bottom: 1rem;
+    }
+    .config-row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin-bottom: .75rem; }
+    .config-row label { font-size: .85rem; color: var(--muted); min-width: 140px; font-weight: 600; }
+    .config-input {
+      background: var(--surface2);
+      border: 1.5px solid rgba(255,255,255,.1);
+      border-radius: .5rem;
+      padding: .5rem .9rem;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: .9rem;
+      width: 220px;
+    }
+    .config-input:focus { outline: none; border-color: var(--gold); }
+    .btn-save {
+      background: var(--gold);
+      color: #1a1200;
+      border: none; border-radius: .5rem;
+      padding: .55rem 1.3rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: .85rem;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-save:hover { opacity: .85; }
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: .5rem;
+      padding: .55rem 1.3rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: .85rem;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-danger:hover { background: rgba(255,79,109,.15); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      background: var(--green); color: #fff;
+      padding: .75rem 1.5rem; border-radius: .75rem;
+      font-weight: 700; font-size: .9rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+      z-index: 9999;
+    }
+    #toast.show { opacity: 1; }
+
+    @media (max-width: 480px) {
+      #grid { grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap:.3rem; }
+      .admin-grid { grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap:.3rem; }
+      .num-btn, .admin-num { font-size: .7rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="summary">
+  <div class="summary-info">
+    <div class="summary-chip">🎟️ Selecionados: <span class="val" id="countDisplay">0</span></div>
+    <div class="summary-chip">💰 Total: <span class="val" id="totalDisplay">R$ 0,00</span></div>
+    <div class="summary-chip" id="descDisplay" style="color:var(--green);display:none">✅ Desconto aplicado!</div>
+  </div>
+  <button id="btnEnviar" disabled>
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.533 5.861L.054 23.077a1 1 0 001.224 1.225l5.238-1.474A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.667-.523-5.188-1.43l-.368-.22-3.809 1.071 1.085-3.724-.241-.382A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+    Enviar no WhatsApp
+  </button>
+</div>
+
+<div class="wrapper">
+  <header>
+    <div class="badge" id="rifaBadge">💛 Sorrisos da Melhor Idade</div>
+    <h1 id="rifaTitulo">RIFA<br>SOLIDÁRIA</h1>
+    <p class="subtitle" id="rifaSubtitulo">💛 Sorrisos da Melhor Idade — Escolha seus números e faça a diferença!</p>
+  </header>
+
+  <div class="pricing">
+    <div class="price-card">
+      <div class="val">R$5</div>
+      <div class="label">por número</div>
+    </div>
+    <div class="price-card" style="border-color:rgba(34,197,94,.3)">
+      <div class="val" style="color:var(--green)">R$4</div>
+      <div class="label">por número<br>(3 ou mais números)</div>
+    </div>
+  </div>
+
+  <p class="section-title">ESCOLHA SEUS NÚMEROS</p>
+  <div id="grid"></div>
+
+  <button id="adminToggle">⚙️ Área do Administrador</button>
+
+  <div id="adminPanel">
+    <div class="admin-header">
+      <h2>⚙️ Painel Admin</h2>
+    </div>
+
+    <div id="loginArea">
+      <p>Digite a senha para acessar o painel</p>
+      <input type="password" id="pwdInput" placeholder="Senha..." />
+      <button id="btnLogin">Entrar</button>
+      <p id="loginError">Senha incorreta.</p>
+    </div>
+
+    <div id="adminContent">
+      <div class="config-section">
+        <h3>CONFIGURAÇÕES DA RIFA</h3>
+        <div class="config-row">
+          <label>Título</label>
+          <input class="config-input" id="cfgTitulo" type="text" placeholder="RIFA SOLIDÁRIA" />
+        </div>
+        <div class="config-row">
+          <label>Subtítulo</label>
+          <input class="config-input" id="cfgSubtitulo" type="text" placeholder="Sorrisos da Melhor Idade..." />
+        </div>
+        <div class="config-row">
+          <label>Número do WhatsApp</label>
+          <input class="config-input" id="cfgWhatsapp" type="text" placeholder="5511999999999" />
+        </div>
+        <div class="config-row">
+          <label>Nome da rifa (badge)</label>
+          <input class="config-input" id="cfgBadge" type="text" placeholder="💛 Sorrisos da Melhor Idade" />
+        </div>
+        <div class="config-row">
+          <label>Senha admin</label>
+          <input class="config-input" id="cfgSenha" type="password" placeholder="Nova senha..." />
+        </div>
+        <div style="display:flex;gap:.75rem;margin-top:.5rem;flex-wrap:wrap;">
+          <button class="btn-save" onclick="saveConfig()">💾 Salvar Configurações</button>
+          <button class="btn-danger" onclick="resetTudo()">🗑️ Limpar tudo</button>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <h3>GERENCIAR NÚMEROS VENDIDOS</h3>
+        <div class="admin-legend">
+          <span><span class="legend-dot" style="background:var(--surface2);border:1px solid rgba(255,255,255,.15)"></span>Disponível</span>
+          <span><span class="legend-dot" style="background:var(--accent)"></span>Vendido (clique para liberar)</span>
+        </div>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:.75rem;">Clique em um número para marcar/desmarcar como vendido.</p>
+        <div class="admin-grid" id="adminGrid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast">✅ Configurações salvas!</div>
+
+<script>
+  // ── State ──
+  const TOTAL = 300;
+  let selectedNums = [];
+  let soldNums = new Set(JSON.parse(localStorage.getItem('rifaSold') || '[]'));
+  let config = JSON.parse(localStorage.getItem('rifaConfig') || '{}');
+  let adminLoggedIn = false;
+
+  const DEFAULT_CONFIG = {
+    titulo: 'RIFA\nSOLIDÁRIA',
+    subtitulo: '💛 Sorrisos da Melhor Idade — Escolha seus números e faça a diferença!',
+    whatsapp: '5511999999999',
+    badge: '💛 Sorrisos da Melhor Idade',
+    senha: 'admin123'
+  };
+
+  function getConfig(k) { return config[k] ?? DEFAULT_CONFIG[k]; }
+
+  // ── Init ──
+  function applyConfig() {
+    const titulo = getConfig('titulo');
+    document.getElementById('rifaTitulo').innerHTML = titulo.replace('\n','<br>');
+    document.getElementById('rifaSubtitulo').textContent = getConfig('subtitulo');
+    document.getElementById('rifaBadge').textContent = getConfig('badge');
+    document.getElementById('cfgTitulo').value = titulo;
+    document.getElementById('cfgSubtitulo').value = getConfig('subtitulo');
+    document.getElementById('cfgWhatsapp').value = getConfig('whatsapp');
+    document.getElementById('cfgBadge').value = getConfig('badge');
+  }
+
+  // ── Grid ──
+  function buildGrid() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    for (let i = 1; i <= TOTAL; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'num-btn' + (soldNums.has(i) ? ' sold' : '');
+      btn.dataset.n = i;
+      btn.textContent = String(i).padStart(3, '0');
+      if (!soldNums.has(i)) btn.onclick = () => toggleNum(i);
+      grid.appendChild(btn);
+    }
+  }
+
+  function buildAdminGrid() {
+    const grid = document.getElementById('adminGrid');
+    grid.innerHTML = '';
+    for (let i = 1; i <= TOTAL; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'admin-num' + (soldNums.has(i) ? ' sold-admin' : '');
+      btn.dataset.n = i;
+      btn.textContent = String(i).padStart(3, '0');
+      btn.onclick = () => toggleSold(i);
+      grid.appendChild(btn);
+    }
+  }
+
+  // ── Toggle number selection ──
+  function toggleNum(n) {
+    if (soldNums.has(n)) return;
+    const idx = selectedNums.indexOf(n);
+    if (idx === -1) selectedNums.push(n);
+    else selectedNums.splice(idx, 1);
+    updateUI();
+  }
+
+  // ── Pricing ──
+  function calcTotal() {
+    const q = selectedNums.length;
+    const price = q >= 3 ? 4 : 5;
+    return q * price;
+  }
+
+  function formatBRL(val) {
+    return 'R$ ' + val.toFixed(2).replace('.', ',');
+  }
+
+  function updateUI() {
+    const q = selectedNums.length;
+    const total = calcTotal();
+    document.getElementById('countDisplay').textContent = q;
+    document.getElementById('totalDisplay').textContent = formatBRL(total);
+    document.getElementById('descDisplay').style.display = q >= 3 ? 'flex' : 'none';
+    document.getElementById('btnEnviar').disabled = q === 0;
+
+    // update button states
+    document.querySelectorAll('.num-btn').forEach(btn => {
+      const n = parseInt(btn.dataset.n);
+      if (!soldNums.has(n)) {
+        btn.classList.toggle('selected', selectedNums.includes(n));
+      }
+    });
+  }
+
+  // ── WhatsApp ──
+  document.getElementById('btnEnviar').addEventListener('click', () => {
+    if (selectedNums.length === 0) return;
+    const sorted = [...selectedNums].sort((a,b) => a-b);
+    const q = sorted.length;
+    const price = q >= 3 ? 4 : 5;
+    const total = calcTotal();
+    const numList = sorted.map(n => String(n).padStart(3,'0')).join(', ');
+    const msg =
+      `🎟️ *Reserva de Números - RifaSolidaria Sorrisos da Melhor Idade*\n\n` +
+      `Olá! Gostaria de reservar os seguintes números:\n\n` +
+      `*Números:* ${numList}\n` +
+      `*Quantidade:* ${q} número${q > 1 ? 's' : ''}\n` +
+      `*Valor por número:* ${formatBRL(price)}\n` +
+      `*Total:* ${formatBRL(total)}\n\n` +
+      (q >= 3 ? `✅ _Desconto de grupo aplicado (R$4/número)_\n\n` : '') +
+      `Aguardo as informações de pagamento. Obrigado!`;
+
+    const phone = getConfig('whatsapp').replace(/\D/g,'');
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  });
+
+  // ── Admin ──
+  document.getElementById('adminToggle').addEventListener('click', () => {
+    const panel = document.getElementById('adminPanel');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open') && adminLoggedIn) buildAdminGrid();
+  });
+
+  document.getElementById('btnLogin').addEventListener('click', doLogin);
+  document.getElementById('pwdInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+  function doLogin() {
+    const val = document.getElementById('pwdInput').value;
+    if (val === getConfig('senha')) {
+      adminLoggedIn = true;
+      document.getElementById('loginArea').style.display = 'none';
+      document.getElementById('adminContent').classList.add('visible');
+      applyConfig();
+      buildAdminGrid();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('pwdInput').value = '';
+    }
+  }
+
+  function toggleSold(n) {
+    if (soldNums.has(n)) soldNums.delete(n);
+    else soldNums.add(n);
+    // remove from selected if just sold
+    const idx = selectedNums.indexOf(n);
+    if (idx !== -1) selectedNums.splice(idx, 1);
+    saveSold();
+    buildGrid();
+    buildAdminGrid();
+    updateUI();
+  }
+
+  function saveSold() {
+    localStorage.setItem('rifaSold', JSON.stringify([...soldNums]));
+  }
+
+  function saveConfig() {
+    const newSenha = document.getElementById('cfgSenha').value.trim();
+    config = {
+      titulo: document.getElementById('cfgTitulo').value || DEFAULT_CONFIG.titulo,
+      subtitulo: document.getElementById('cfgSubtitulo').value || DEFAULT_CONFIG.subtitulo,
+      whatsapp: document.getElementById('cfgWhatsapp').value || DEFAULT_CONFIG.whatsapp,
+      badge: document.getElementById('cfgBadge').value || DEFAULT_CONFIG.badge,
+      senha: newSenha || getConfig('senha'),
+    };
+    localStorage.setItem('rifaConfig', JSON.stringify(config));
+    applyConfig();
+    document.getElementById('cfgSenha').value = '';
+    showToast('✅ Configurações salvas!');
+  }
+
+  function resetTudo() {
+    if (!confirm('Tem certeza? Isso vai limpar todos os números vendidos e as configurações.')) return;
+    soldNums = new Set();
+    selectedNums = [];
+    config = {};
+    localStorage.removeItem('rifaSold');
+    localStorage.removeItem('rifaConfig');
+    applyConfig();
+    buildGrid();
+    buildAdminGrid();
+    updateUI();
+    showToast('🗑️ Dados resetados!');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ── Boot ──
+  applyConfig();
+  buildGrid();
+  updateUI();
+</script>
+</body>
+</html>
