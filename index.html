@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎟️ Rifa Solidaria — Sorrisos da Melhor Idade</title>
+  <title>🎟️ RifaSolidaria — Sorrisos da Melhor Idade</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -461,11 +461,16 @@
 <div id="toast">✅ Configurações salvas!</div>
 
 <script>
-  // ── State ──
+  // ════════════════════════════════════════════════════
+  //  🔥 COLE AQUI A URL DO SEU FIREBASE REALTIME DATABASE
+  //  Exemplo: 'https://meu-projeto-default-rtdb.firebaseio.com'
+  const FIREBASE_URL = 'https://sorrisosdamelhoridade-default-rtdb.firebaseio.com/';
+  // ════════════════════════════════════════════════════
+
   const TOTAL = 300;
   let selectedNums = [];
-  let soldNums = new Set(JSON.parse(localStorage.getItem('rifaSold') || '[]'));
-  let config = JSON.parse(localStorage.getItem('rifaConfig') || '{}');
+  let soldNums = new Set();
+  let config = {};
   let adminLoggedIn = false;
 
   const DEFAULT_CONFIG = {
@@ -478,7 +483,46 @@
 
   function getConfig(k) { return config[k] ?? DEFAULT_CONFIG[k]; }
 
-  // ── Init ──
+  // ── Firebase REST helpers ──
+  async function fbGet(path) {
+    try {
+      const r = await fetch(`${FIREBASE_URL}/${path}.json`);
+      if (!r.ok) throw new Error(r.status);
+      return await r.json();
+    } catch(e) { console.warn('fbGet error', e); return null; }
+  }
+
+  async function fbSet(path, data) {
+    try {
+      await fetch(`${FIREBASE_URL}/${path}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } catch(e) { console.warn('fbSet error', e); }
+  }
+
+  // ── Load state from Firebase ──
+  async function loadData() {
+    setGridLoading(true);
+    const [soldArr, cfg] = await Promise.all([
+      fbGet('soldNums'),
+      fbGet('config')
+    ]);
+    soldNums = new Set(Array.isArray(soldArr) ? soldArr : []);
+    config   = (cfg && typeof cfg === 'object') ? cfg : {};
+    setGridLoading(false);
+    applyConfig();
+    buildGrid();
+    updateUI();
+  }
+
+  function setGridLoading(on) {
+    document.getElementById('grid').style.opacity = on ? '.35' : '1';
+    document.getElementById('grid').style.pointerEvents = on ? 'none' : '';
+  }
+
+  // ── Apply config to DOM ──
   function applyConfig() {
     const titulo = getConfig('titulo');
     document.getElementById('rifaTitulo').innerHTML = titulo.replace('\n','<br>');
@@ -490,7 +534,7 @@
     document.getElementById('cfgBadge').value = getConfig('badge');
   }
 
-  // ── Grid ──
+  // ── Build public grid ──
   function buildGrid() {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
@@ -504,6 +548,7 @@
     }
   }
 
+  // ── Build admin grid ──
   function buildAdminGrid() {
     const grid = document.getElementById('adminGrid');
     grid.innerHTML = '';
@@ -517,7 +562,7 @@
     }
   }
 
-  // ── Toggle number selection ──
+  // ── Number selection ──
   function toggleNum(n) {
     if (soldNums.has(n)) return;
     const idx = selectedNums.indexOf(n);
@@ -529,8 +574,7 @@
   // ── Pricing ──
   function calcTotal() {
     const q = selectedNums.length;
-    const price = q >= 3 ? 4 : 5;
-    return q * price;
+    return q * (q >= 3 ? 4 : 5);
   }
 
   function formatBRL(val) {
@@ -539,51 +583,44 @@
 
   function updateUI() {
     const q = selectedNums.length;
-    const total = calcTotal();
     document.getElementById('countDisplay').textContent = q;
-    document.getElementById('totalDisplay').textContent = formatBRL(total);
+    document.getElementById('totalDisplay').textContent = formatBRL(calcTotal());
     document.getElementById('descDisplay').style.display = q >= 3 ? 'flex' : 'none';
     document.getElementById('btnEnviar').disabled = q === 0;
-
-    // update button states
     document.querySelectorAll('.num-btn').forEach(btn => {
       const n = parseInt(btn.dataset.n);
-      if (!soldNums.has(n)) {
-        btn.classList.toggle('selected', selectedNums.includes(n));
-      }
+      if (!soldNums.has(n)) btn.classList.toggle('selected', selectedNums.includes(n));
     });
   }
 
   // ── WhatsApp ──
   document.getElementById('btnEnviar').addEventListener('click', () => {
-    if (selectedNums.length === 0) return;
+    if (!selectedNums.length) return;
     const sorted = [...selectedNums].sort((a,b) => a-b);
     const q = sorted.length;
     const price = q >= 3 ? 4 : 5;
-    const total = calcTotal();
     const numList = sorted.map(n => String(n).padStart(3,'0')).join(', ');
     const msg =
-      `🎟️ *Reserva de Números - Rifa Solidaria Sorrisos da Melhor Idade*\n\n` +
+      `🎟️ *RifaSolidaria — Sorrisos da Melhor Idade*\n\n` +
       `Olá! Gostaria de reservar os seguintes números:\n\n` +
       `*Números:* ${numList}\n` +
       `*Quantidade:* ${q} número${q > 1 ? 's' : ''}\n` +
       `*Valor por número:* ${formatBRL(price)}\n` +
-      `*Total:* ${formatBRL(total)}\n\n` +
-      (q >= 3 ? `✅ _Desconto de grupo aplicado (R$4/número)_\n\n` : '') +
-      `Aguardo as informações de pagamento. Obrigado!`;
-
+      `*Total:* ${formatBRL(calcTotal())}\n\n` +
+      (q >= 3 ? `✅ _Desconto aplicado (R$4/número para 3 ou mais)_\n\n` : '') +
+      `Aguardo as informações de pagamento. Obrigado! 💛`;
     const phone = getConfig('whatsapp').replace(/\D/g,'');
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   });
 
-  // ── Admin ──
+  // ── Admin panel toggle ──
   document.getElementById('adminToggle').addEventListener('click', () => {
     const panel = document.getElementById('adminPanel');
     panel.classList.toggle('open');
     if (panel.classList.contains('open') && adminLoggedIn) buildAdminGrid();
   });
 
+  // ── Login ──
   document.getElementById('btnLogin').addEventListener('click', doLogin);
   document.getElementById('pwdInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
@@ -601,49 +638,48 @@
     }
   }
 
-  function toggleSold(n) {
+  // ── Toggle sold (admin) — salva no Firebase ──
+  async function toggleSold(n) {
     if (soldNums.has(n)) soldNums.delete(n);
     else soldNums.add(n);
-    // remove from selected if just sold
     const idx = selectedNums.indexOf(n);
     if (idx !== -1) selectedNums.splice(idx, 1);
-    saveSold();
+    // save to Firebase
+    await fbSet('soldNums', [...soldNums]);
     buildGrid();
     buildAdminGrid();
     updateUI();
+    showToast('💾 Salvo na nuvem!');
   }
 
-  function saveSold() {
-    localStorage.setItem('rifaSold', JSON.stringify([...soldNums]));
-  }
-
-  function saveConfig() {
+  // ── Save config — salva no Firebase ──
+  async function saveConfig() {
     const newSenha = document.getElementById('cfgSenha').value.trim();
     config = {
-      titulo: document.getElementById('cfgTitulo').value || DEFAULT_CONFIG.titulo,
+      titulo:    document.getElementById('cfgTitulo').value    || DEFAULT_CONFIG.titulo,
       subtitulo: document.getElementById('cfgSubtitulo').value || DEFAULT_CONFIG.subtitulo,
-      whatsapp: document.getElementById('cfgWhatsapp').value || DEFAULT_CONFIG.whatsapp,
-      badge: document.getElementById('cfgBadge').value || DEFAULT_CONFIG.badge,
-      senha: newSenha || getConfig('senha'),
+      whatsapp:  document.getElementById('cfgWhatsapp').value  || DEFAULT_CONFIG.whatsapp,
+      badge:     document.getElementById('cfgBadge').value     || DEFAULT_CONFIG.badge,
+      senha:     newSenha || getConfig('senha'),
     };
-    localStorage.setItem('rifaConfig', JSON.stringify(config));
+    await fbSet('config', config);
     applyConfig();
     document.getElementById('cfgSenha').value = '';
-    showToast('✅ Configurações salvas!');
+    showToast('✅ Configurações salvas na nuvem!');
   }
 
-  function resetTudo() {
+  // ── Reset tudo — limpa no Firebase ──
+  async function resetTudo() {
     if (!confirm('Tem certeza? Isso vai limpar todos os números vendidos e as configurações.')) return;
     soldNums = new Set();
     selectedNums = [];
     config = {};
-    localStorage.removeItem('rifaSold');
-    localStorage.removeItem('rifaConfig');
+    await Promise.all([fbSet('soldNums', []), fbSet('config', {})]);
     applyConfig();
     buildGrid();
     buildAdminGrid();
     updateUI();
-    showToast('🗑️ Dados resetados!');
+    showToast('🗑️ Dados resetados na nuvem!');
   }
 
   function showToast(msg) {
@@ -653,10 +689,10 @@
     setTimeout(() => t.classList.remove('show'), 2500);
   }
 
-  // ── Boot ──
-  applyConfig();
+  // ── Boot — carrega do Firebase ──
+  applyConfig(); // mostra defaults imediatamente
   buildGrid();
-  updateUI();
+  loadData();    // sobrescreve com dados reais do Firebase
 </script>
 </body>
 </html>
