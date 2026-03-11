@@ -30,7 +30,6 @@
       overflow-x: hidden;
     }
 
-    /* ── Background ── */
     body::before {
       content: '';
       position: fixed; inset: 0; z-index: 0;
@@ -42,7 +41,6 @@
 
     .wrapper { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 1.25rem 4rem; }
 
-    /* ── Header ── */
     header {
       text-align: center;
       padding: 3rem 1rem 2rem;
@@ -77,7 +75,6 @@
       font-weight: 600;
     }
 
-    /* ── Pricing card ── */
     .pricing {
       display: flex;
       gap: 1rem;
@@ -101,7 +98,6 @@
     }
     .price-card .label { font-size: .78rem; color: var(--muted); margin-top: .25rem; font-weight: 600; }
 
-    /* ── Summary bar ── */
     #summary {
       position: sticky;
       top: 0;
@@ -141,7 +137,6 @@
     #btnEnviar:disabled { opacity: .4; cursor: not-allowed; }
     #btnEnviar svg { width:18px; height:18px; fill:currentColor; }
 
-    /* ── Grid ── */
     .section-title {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.6rem;
@@ -198,7 +193,6 @@
       opacity: .6;
     }
 
-    /* ── Admin toggle ── */
     #adminToggle {
       margin: 3rem auto 0;
       display: block;
@@ -214,7 +208,6 @@
     }
     #adminToggle:hover { border-color: var(--gold-dark); color: var(--gold); }
 
-    /* ── Admin panel ── */
     #adminPanel {
       display: none;
       margin-top: 1.5rem;
@@ -301,7 +294,6 @@
     }
     .legend-dot { display: inline-block; width:10px; height:10px; border-radius:2px; margin-right:.3rem; }
 
-    /* ── Config section ── */
     .config-section {
       margin-top: 1.5rem;
       padding-top: 1.5rem;
@@ -349,7 +341,6 @@
     }
     .btn-danger:hover { background: rgba(255,79,109,.15); }
 
-    /* ── Toast ── */
     #toast {
       position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
       background: var(--green); color: #fff;
@@ -436,8 +427,8 @@
           <input class="config-input" id="cfgBadge" type="text" placeholder="💛 Sorrisos da Melhor Idade" />
         </div>
         <div class="config-row">
-          <label>Senha admin</label>
-          <input class="config-input" id="cfgSenha" type="password" placeholder="Nova senha..." />
+          <label>Nova senha admin</label>
+          <input class="config-input" id="cfgSenha" type="password" placeholder="Deixe em branco para manter" />
         </div>
         <div style="display:flex;gap:.75rem;margin-top:.5rem;flex-wrap:wrap;">
           <button class="btn-save" onclick="saveConfig()">💾 Salvar Configurações</button>
@@ -462,8 +453,7 @@
 
 <script>
   // ════════════════════════════════════════════════════
-  //  🔥 COLE AQUI A URL DO SEU FIREBASE REALTIME DATABASE
-  //  Exemplo: 'https://meu-projeto-default-rtdb.firebaseio.com'
+  //  🔥 URL do Firebase Realtime Database
   const FIREBASE_URL = 'https://sorrisosdamelhoridade-default-rtdb.firebaseio.com/';
   // ════════════════════════════════════════════════════
 
@@ -473,15 +463,32 @@
   let config = {};
   let adminLoggedIn = false;
 
+
+
   const DEFAULT_CONFIG = {
-    titulo: 'RIFA\nSOLIDÁRIA',
+    titulo:    'RIFA\nSOLIDÁRIA',
     subtitulo: '💛 Sorrisos da Melhor Idade — Escolha seus números e faça a diferença!',
-    whatsapp: '5511999999999',
-    badge: '💛 Sorrisos da Melhor Idade',
-    senha: 'admin123'
+    whatsapp:  '5511999999999',
+    badge:     '💛 Sorrisos da Melhor Idade',
+    // 'senha' agora armazena o hash SHA-256, nunca o texto puro
+
   };
 
   function getConfig(k) { return config[k] ?? DEFAULT_CONFIG[k]; }
+
+  // ════════════════════════════════════════════════════
+  // 🔐 SHA-256 usando a Web Crypto API nativa do navegador
+  // Não precisa de nenhuma biblioteca externa.
+  // ════════════════════════════════════════════════════
+  async function hashSHA256(text) {
+    const encoder = new TextEncoder();
+    const data     = encoder.encode(text);
+    const hashBuf  = await crypto.subtle.digest('SHA-256', data);
+    // Converte o ArrayBuffer em string hexadecimal
+    return Array.from(new Uint8Array(hashBuf))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
 
   // ── Firebase REST helpers ──
   async function fbGet(path) {
@@ -502,7 +509,7 @@
     } catch(e) { console.warn('fbSet error', e); }
   }
 
-  // ── Load state from Firebase ──
+  // ── Carrega estado do Firebase ──
   async function loadData() {
     setGridLoading(true);
     const [soldArr, cfg] = await Promise.all([
@@ -522,18 +529,17 @@
     document.getElementById('grid').style.pointerEvents = on ? 'none' : '';
   }
 
-  // ── Apply config to DOM ──
+  // ── Aplica config no DOM ──
   function applyConfig() {
-    const titulo = getConfig('titulo');
     document.getElementById('rifaSubtitulo').textContent = getConfig('subtitulo');
-    document.getElementById('rifaBadge').textContent = getConfig('badge');
-    document.getElementById('cfgTitulo').value = titulo;
+    document.getElementById('rifaBadge').textContent     = getConfig('badge');
+    document.getElementById('cfgTitulo').value    = getConfig('titulo');
     document.getElementById('cfgSubtitulo').value = getConfig('subtitulo');
-    document.getElementById('cfgWhatsapp').value = getConfig('whatsapp');
-    document.getElementById('cfgBadge').value = getConfig('badge');
+    document.getElementById('cfgWhatsapp').value  = getConfig('whatsapp');
+    document.getElementById('cfgBadge').value     = getConfig('badge');
   }
 
-  // ── Build public grid ──
+  // ── Grids ──
   function buildGrid() {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
@@ -547,7 +553,6 @@
     }
   }
 
-  // ── Build admin grid ──
   function buildAdminGrid() {
     const grid = document.getElementById('adminGrid');
     grid.innerHTML = '';
@@ -561,7 +566,7 @@
     }
   }
 
-  // ── Number selection ──
+  // ── Seleção de números ──
   function toggleNum(n) {
     if (soldNums.has(n)) return;
     const idx = selectedNums.indexOf(n);
@@ -570,7 +575,6 @@
     updateUI();
   }
 
-  // ── Pricing ──
   function calcTotal() {
     const q = selectedNums.length;
     return q * (q >= 3 ? 4 : 5);
@@ -606,26 +610,32 @@
       `*Quantidade:* ${q} número${q > 1 ? 's' : ''}\n` +
       `*Valor por número:* ${formatBRL(price)}\n` +
       `*Total:* ${formatBRL(calcTotal())}\n\n` +
-      (q >= 3 ? `✅ _Desconto aplicado (R$4/número para 3 ou mais)_\n\n` : '') +
-      `Aguardo as informações de pagamento. Obrigado! 💛`;
+      (q >= 3 ? `✅ _Desconto aplicado (R$4/número para 3 ou mais)_\n\n` : '');
     const phone = getConfig('whatsapp').replace(/\D/g,'');
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   });
 
-  // ── Admin panel toggle ──
+  // ── Toggle painel admin ──
   document.getElementById('adminToggle').addEventListener('click', () => {
     const panel = document.getElementById('adminPanel');
     panel.classList.toggle('open');
     if (panel.classList.contains('open') && adminLoggedIn) buildAdminGrid();
   });
 
-  // ── Login ──
+  // ── Login com SHA-256 ──
   document.getElementById('btnLogin').addEventListener('click', doLogin);
   document.getElementById('pwdInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-  function doLogin() {
-    const val = document.getElementById('pwdInput').value;
-    if (val === getConfig('senha')) {
+  async function doLogin() {
+    const raw = document.getElementById('pwdInput').value;
+    if (!raw) return;
+
+    // Gera o hash do que o usuário digitou
+    const inputHash = await hashSHA256(raw);
+    // Compara com o hash armazenado (nunca com o texto puro)
+    const storedHash = getConfig('senha');
+
+    if (inputHash == storedHash) {
       adminLoggedIn = true;
       document.getElementById('loginArea').style.display = 'none';
       document.getElementById('adminContent').classList.add('visible');
@@ -637,13 +647,12 @@
     }
   }
 
-  // ── Toggle sold (admin) — salva no Firebase ──
+  // ── Toggle vendido (admin) ──
   async function toggleSold(n) {
     if (soldNums.has(n)) soldNums.delete(n);
     else soldNums.add(n);
     const idx = selectedNums.indexOf(n);
     if (idx !== -1) selectedNums.splice(idx, 1);
-    // save to Firebase
     await fbSet('soldNums', [...soldNums]);
     buildGrid();
     buildAdminGrid();
@@ -651,23 +660,30 @@
     showToast('💾 Salvo na nuvem!');
   }
 
-  // ── Save config — salva no Firebase ──
+  // ── Salvar configurações (senha vira hash antes de subir) ──
   async function saveConfig() {
-    const newSenha = document.getElementById('cfgSenha').value.trim();
+    const rawSenha = document.getElementById('cfgSenha').value.trim();
+
+    // Se o admin digitou nova senha → gera o hash; senão mantém o hash atual
+    const senhaHash = rawSenha
+      ? await hashSHA256(rawSenha)
+      : getConfig('senha');
+
     config = {
       titulo:    document.getElementById('cfgTitulo').value    || DEFAULT_CONFIG.titulo,
       subtitulo: document.getElementById('cfgSubtitulo').value || DEFAULT_CONFIG.subtitulo,
       whatsapp:  document.getElementById('cfgWhatsapp').value  || DEFAULT_CONFIG.whatsapp,
       badge:     document.getElementById('cfgBadge').value     || DEFAULT_CONFIG.badge,
-      senha:     newSenha || getConfig('senha'),
+      senha:     senhaHash,   // ← hash, jamais o texto puro
     };
+
     await fbSet('config', config);
     applyConfig();
     document.getElementById('cfgSenha').value = '';
     showToast('✅ Configurações salvas na nuvem!');
   }
 
-  // ── Reset tudo — limpa no Firebase ──
+  // ── Reset total ──
   async function resetTudo() {
     if (!confirm('Tem certeza? Isso vai limpar todos os números vendidos e as configurações.')) return;
     soldNums = new Set();
@@ -688,10 +704,10 @@
     setTimeout(() => t.classList.remove('show'), 2500);
   }
 
-  // ── Boot — carrega do Firebase ──
-  applyConfig(); // mostra defaults imediatamente
+  // ── Boot ──
+  applyConfig();
   buildGrid();
-  loadData();    // sobrescreve com dados reais do Firebase
+  loadData();
 </script>
 </body>
 </html>
